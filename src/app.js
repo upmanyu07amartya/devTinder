@@ -6,10 +6,13 @@ app.get("/",(req,res)=>{
     res.send("Hello from Home Page");
 });
 
-app.get("/hello",(req,res)=>{
-    res.send("Hello from Hello Page");   // request handler
-});
+app.get("/user",(req,res)=>{
+    res.send({firstName:"Amartya",lastName:"Upmanyu"});
+})
 
+app.post("/user",(req,res)=>{
+    res.send("User created");
+});
 
 app.listen(3000,()=>{
     console.log('Server is running on PORT 3000');
