@@ -39,6 +39,36 @@ app.get("/users", async(req,res)=>{
   }
 })
 
+app.delete("/user", async(req,res)=>{
+  const userId = req.body.id;
+  try{
+    const deletedUser = await User.findByIdAndDelete(userId);
+    if(!deletedUser){
+      res.status(404).send("User not found");
+    }else{
+      res.send("User deleted successfully");
+    }
+  }catch(err){
+    res.status(500).send("Error deleting user");
+  }
+})
+
+app.patch("/user", async(req,res)=>{
+  const userId = req.body.id;
+  const data = req.body;
+  try{
+    const updatedUser = await User.findByIdAndUpdate({_id: userId}, data, {returnDocument: "after"});
+    if(!updatedUser){
+      res.status(404).send("User not found");
+    }else{
+      res.send("User updated successfully", updatedUser);
+    }
+  }catch(err){
+    res.status(500).send("Error updating user");
+  }
+})
+
+
 // Connected to DB and only on successful connection we start the server
 connectDB()
   .then(() => {
