@@ -8,10 +8,14 @@ app.use(express.json()); // Middleware to parse JSON request bodies
 
 app.post("/signup", async (req, res) => {
   const user = new User(req.body); // create a new user instance with the request body data
+  
   try {
+    if (req.body.skills.length > 10) {
+      throw new Error("Skills should not be more than 10");
+    }
     await user.save();  // save it to the database
     res.send("User created Successfully");
-  } catch (err) {
+  } catch(err) {
     res.status(500).send(err.message);
   }
 });
@@ -53,18 +57,26 @@ app.delete("/user", async(req,res)=>{
   }
 })
 
-app.patch("/user", async(req,res)=>{
-  const userId = req.body.id;
+app.patch("/user/:userId", async(req,res)=>{
+  const userId = req.params?.userId;
   const data = req.body;
   try{
-    const updatedUser = await User.findByIdAndUpdate({_id: userId}, data, {returnDocument: "after"});
+    const allowedUpdates = ["password", "description","profileImageUrl","skills","age","gender"]
+    const isUpdateAllowed = Object.keys(data).every((key)=>allowedUpdates.includes(key));
+    if(!isUpdateAllowed){
+      throw new Error("Invalid Updates: One of the field you are trying to update is not allowed.")
+    }
+    if (data?.skills?.length > 10) {
+      throw new Error("Skills should not be more than 10");
+    }
+    const updatedUser = await User.findByIdAndUpdate({_id: userId}, data, {returnDocument: "after", runValidators:true });
     if(!updatedUser){
       res.status(404).send("User not found");
     }else{
       res.send("User updated successfully", updatedUser);
     }
   }catch(err){
-    res.status(500).send("Error updating user");
+    res.status(500).send(err.message);
   }
 })
 
