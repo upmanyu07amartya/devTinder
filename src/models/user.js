@@ -1,4 +1,5 @@
 const {mongoose} = require("mongoose");
+const validator  = require("validator");
 
 const userSchema = new mongoose.Schema(
   {
@@ -16,11 +17,17 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
+      validate(value){
+        if(!validator.isEmail(value)){
+            throw new Error("Entered email is not valid- "+value);
+        }
+
+      }
     },
     password: {
       type: String,
       required: true,
-      minLength: [6, "Password must be at least 6 characters long"],
+      minLength: 6    //can use a validator isStrongPassword.
     },
     age: {
       type: Number,
@@ -41,6 +48,11 @@ const userSchema = new mongoose.Schema(
     profileImageUrl: {
       type: String,
       default: "https://www.vecteezy.com/free-vector/profile-placeholder",
+      validate(value){
+        if(!validator.isURL(value)){
+            throw new Error("Please enter a valid url")
+        }
+      }
     },
     skills:{
         type:[String],
