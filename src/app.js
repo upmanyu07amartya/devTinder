@@ -1,21 +1,34 @@
 const express = require("express");
+const bcrypt = require("bcrypt")
 const { connectDB } = require("./config/database");
 const User = require("./models/user");
+const {validateSignup} = require("./utils/validation")
 
 const app = express();
 
 app.use(express.json()); // Middleware to parse JSON request bodies
 
 app.post("/signup", async (req, res) => {
-  const user = new User(req.body); // create a new user instance with the request body data
-  
   try {
-    if (req.body.skills.length > 10) {
+    // validate the request 
+    validateSignup(req)
+    // encrypt the password
+    const {firstName, lastName, email, password} = req.body;
+    const passwordHash = await bcrypt.hash(password,10)     //brypt.hash returns a promise to awaiting promise
+
+    const user = new User({
+      firstName,
+      lastName,
+      email,
+      password:passwordHash
+    }); // create a new user instance with the request body data
+
+    if (req.body.skills?.length > 10) {
       throw new Error("Skills should not be more than 10");
     }
-    await user.save();  // save it to the database
+    await user.save(); // save it to the database
     res.send("User created Successfully");
-  } catch(err) {
+  } catch (err) {
     res.status(500).send(err.message);
   }
 });
