@@ -1,8 +1,8 @@
 const express = require("express");
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcrypt");
 const { connectDB } = require("./config/database");
 const User = require("./models/user");
-const {validateSignup} = require("./utils/validation")
+const { validateSignup } = require("./utils/validation");
 
 const app = express();
 
@@ -10,17 +10,17 @@ app.use(express.json()); // Middleware to parse JSON request bodies
 
 app.post("/signup", async (req, res) => {
   try {
-    // validate the request 
-    validateSignup(req)
+    // validate the request
+    validateSignup(req);
     // encrypt the password
-    const {firstName, lastName, email, password} = req.body;
-    const passwordHash = await bcrypt.hash(password,10)     //brypt.hash returns a promise to awaiting promise
+    const { firstName, lastName, email, password } = req.body;
+    const passwordHash = await bcrypt.hash(password, 10); //brypt.hash returns a promise to awaiting promise
 
     const user = new User({
       firstName,
       lastName,
       email,
-      password:passwordHash
+      password: passwordHash,
     }); // create a new user instance with the request body data
 
     if (req.body.skills?.length > 10) {
@@ -33,66 +33,98 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-app.get("/user", async(req,res)=>{
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      throw new Error("Invalid Credentials");
+    }
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (isPasswordCorrect) {
+      res.send("Login successful");
+    } else {
+      throw new Error("Invalid Credentials");
+    }
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
+});
+
+app.get("/user", async (req, res) => {
   const userEmail = req.body.email;
-  try{
+  try {
     const user = await User.findOne({ email: userEmail });
-    if(!user){
+    if (!user) {
       res.status(404).send("User not found");
-    }else{
+    } else {
       res.send(user);
     }
-  }catch(err){
+  } catch (err) {
     res.status(500).send("Error Fetching user");
   }
-})
+});
 
-app.get("/users", async(req,res)=>{
-  try{
-    const users = await User.find() // fetch all users from the database
-    res.send(users); 
-  }catch(err){
+app.get("/users", async (req, res) => {
+  try {
+    const users = await User.find(); // fetch all users from the database
+    res.send(users);
+  } catch (err) {
     res.status(500).send("Error fetching users");
   }
-})
+});
 
-app.delete("/user", async(req,res)=>{
+app.delete("/user", async (req, res) => {
   const userId = req.body.id;
-  try{
+  try {
     const deletedUser = await User.findByIdAndDelete(userId);
-    if(!deletedUser){
+    if (!deletedUser) {
       res.status(404).send("User not found");
-    }else{
+    } else {
       res.send("User deleted successfully");
     }
-  }catch(err){
+  } catch (err) {
     res.status(500).send("Error deleting user");
   }
-})
+});
 
-app.patch("/user/:userId", async(req,res)=>{
+app.patch("/user/:userId", async (req, res) => {
   const userId = req.params?.userId;
   const data = req.body;
-  try{
-    const allowedUpdates = ["password", "description","profileImageUrl","skills","age","gender"]
-    const isUpdateAllowed = Object.keys(data).every((key)=>allowedUpdates.includes(key));
-    if(!isUpdateAllowed){
-      throw new Error("Invalid Updates: One of the field you are trying to update is not allowed.")
+  try {
+    const allowedUpdates = [
+      "password",
+      "description",
+      "profileImageUrl",
+      "skills",
+      "age",
+      "gender",
+    ];
+    const isUpdateAllowed = Object.keys(data).every((key) =>
+      allowedUpdates.includes(key),
+    );
+    if (!isUpdateAllowed) {
+      throw new Error(
+        "Invalid Updates: One of the field you are trying to update is not allowed.",
+      );
     }
     if (data?.skills?.length > 10) {
       throw new Error("Skills should not be more than 10");
     }
-    const updatedUser = await User.findByIdAndUpdate({_id: userId}, data, {returnDocument: "after", runValidators:true });
-    if(!updatedUser){
+    const updatedUser = await User.findByIdAndUpdate({ _id: userId }, data, {
+      returnDocument: "after",
+      runValidators: true,
+    });
+    if (!updatedUser) {
       res.status(404).send("User not found");
-    }else{
+    } else {
       res.send("User updated successfully", updatedUser);
     }
-  }catch(err){
+  } catch (err) {
     res.status(500).send(err.message);
   }
-})
-
+});
 
 // Connected to DB and only on successful connection we start the server
 connectDB()
