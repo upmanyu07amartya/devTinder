@@ -1,5 +1,7 @@
-const {mongoose} = require("mongoose");
-const validator  = require("validator");
+const { mongoose } = require("mongoose");
+const validator = require("validator");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const userSchema = new mongoose.Schema(
   {
@@ -17,17 +19,16 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      validate(value){
-        if(!validator.isEmail(value)){
-            throw new Error("Entered email is not valid- "+value);
+      validate(value) {
+        if (!validator.isEmail(value)) {
+          throw new Error("Entered email is not valid- " + value);
         }
-
-      }
+      },
     },
     password: {
       type: String,
       required: true,
-      minLength: 6    //can use a validator isStrongPassword.
+      minLength: 6, //can use a validator isStrongPassword.
     },
     age: {
       type: Number,
@@ -48,21 +49,35 @@ const userSchema = new mongoose.Schema(
     profileImageUrl: {
       type: String,
       default: "https://www.vecteezy.com/free-vector/profile-placeholder",
-      validate(value){
-        if(!validator.isURL(value)){
-            throw new Error("Please enter a valid url")
+      validate(value) {
+        if (!validator.isURL(value)) {
+          throw new Error("Please enter a valid url");
         }
-      }
+      },
     },
-    skills:{
-        type:[String],
-    }
+    skills: {
+      type: [String],
+    },
   },
   {
     timestamps: true,
   },
 );
 
-const User = mongoose.model("User",userSchema);
+userSchema.methods.getJWT = async function () {
+  const user = this;
+  const token = await jwt.sign({ _id: user._id }, "DEV@Tinder$790", {
+    expiresIn: "7d",
+  });
+  return token;
+};
+
+userSchema.methods.comparePass = async function (password) {
+  const user = this;
+  const compared = await bcrypt.compare(password, user.password);
+  return compared;
+};
+
+const User = mongoose.model("User", userSchema);
 
 module.exports = User;
