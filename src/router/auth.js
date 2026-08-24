@@ -18,10 +18,7 @@ authRouter.post("/signup", async (req, res) => {
       email,
       password: passwordHash,
     }); // create a new user instance with the request body data
-
-    if (req.body.skills?.length > 10) {
-      throw new Error("Skills should not be more than 10");
-    }
+    
     await user.save(); // save it to the database
     res.send("User created Successfully");
   } catch (err) {
