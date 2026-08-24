@@ -9,7 +9,7 @@ const userAuth = async (req, res, next) => {
     const { _id } = decodedObj;
     const user = await User.findById(_id);
     if (!user) throw new Error("User not found!!!");
-    req.user = user;
+    req.user = user;         // sets the logged in user in the request.
     next();
   } catch (err) {
     res.status(400).send(err.message);
