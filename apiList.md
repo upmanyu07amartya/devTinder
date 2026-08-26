@@ -11,9 +11,8 @@
  - PATCH /profile/password
 
 # connectionRequestRouter
- - POST /request/send/:status/:userID
- - POST /request/review/accepted/:userID
- - POST /request/review/rejected/:userID
+ - POST /request/send/:status/:userId
+ - POST /request/review/:status/:requestId
 
 # userRouter
  - GET /connections
