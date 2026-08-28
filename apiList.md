@@ -15,8 +15,8 @@
  - POST /request/review/:status/:requestId
 
 # userRouter
- - GET /connections
  - GET /requests/received
+ - GET /connections
  - GET /feed - gets profiles of other users on platform
 
 
