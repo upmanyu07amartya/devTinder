@@ -18,7 +18,7 @@ authRouter.post("/signup", async (req, res) => {
       email,
       password: passwordHash,
     }); // create a new user instance with the request body data
-    
+
     await user.save(); // save it to the database
     res.send("User created Successfully");
   } catch (err) {
@@ -43,7 +43,7 @@ authRouter.post("/login", async (req, res) => {
       res.cookie("token", token, {
         expires: new Date(Date.now() + 8 * 3600000),
       });
-      res.send("Login successful");
+      res.json({ message: "Login successful", data: user });
     } else {
       throw new Error("Invalid Credentials");
     }
