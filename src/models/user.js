@@ -48,7 +48,8 @@ const userSchema = new mongoose.Schema(
     },
     profileImageUrl: {
       type: String,
-      default: "https://www.vecteezy.com/free-vector/profile-placeholder",
+      default:
+        "https://cdn.vectorstock.com/i/500p/54/17/faceless-man-placeholder-vector-24005417.jpg",
       validate(value) {
         if (!validator.isURL(value)) {
           throw new Error("Please enter a valid url");

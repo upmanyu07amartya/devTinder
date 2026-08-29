@@ -10,7 +10,7 @@ profileRouter.get("/profile/view", userAuth, async (req, res) => {
 
     if (!user) throw new Error("No details");
 
-    res.send(user);
+    res.json({data: user});
   } catch (err) {
     res.status(500).send(err.message);
   }
