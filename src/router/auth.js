@@ -3,6 +3,16 @@ const authRouter = express.Router();
 const { validateSignup } = require("../utils/validation");
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
+const USER_SAFE_DATA = [
+  "firstName",
+  "lastName",
+  "email",
+  "age",
+  "description",
+  "profileImageUrl",
+  "skills",
+  "gender",
+];
 
 authRouter.post("/signup", async (req, res) => {
   try {
@@ -43,7 +53,11 @@ authRouter.post("/login", async (req, res) => {
       res.cookie("token", token, {
         expires: new Date(Date.now() + 8 * 3600000),
       });
-      res.json({ message: "Login successful", data: user });
+      const safeData = Object.fromEntries(
+        USER_SAFE_DATA.map((field) => [field, user[field]]),
+      );
+
+      res.json({ message: "Login successful", data: safeData });
     } else {
       throw new Error("Invalid Credentials");
     }

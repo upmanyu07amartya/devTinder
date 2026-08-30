@@ -3,14 +3,27 @@ const profileRouter = express.Router();
 const { userAuth } = require("../middlewares/auth");
 const { validateEditData, validatePassword } = require("../utils/validation");
 const bcrypt = require("bcrypt");
+const USER_SAFE_DATA = [
+  "firstName",
+  "lastName",
+  "email",
+  "age",
+  "description",
+  "profileImageUrl",
+  "skills",
+  "gender",
+];
 
 profileRouter.get("/profile/view", userAuth, async (req, res) => {
   try {
     const user = req.user;
 
     if (!user) throw new Error("No details");
+    const safeData = Object.fromEntries(
+      USER_SAFE_DATA.map((field) => [field, user[field]]),
+    );
 
-    res.json({data: user});
+    res.json({ data: safeData });
   } catch (err) {
     res.status(500).send(err.message);
   }
@@ -27,9 +40,12 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
     //this is something like - loggedInUser.firstName = req.body.firstName... for all fields
     Object.keys(req.body).forEach((key) => (loggedInUser[key] = req.body[key]));
     await loggedInUser.save();
+    const safeData = Object.fromEntries(
+      USER_SAFE_DATA.map((field) => [field, loggedInUser[field]]),
+    );
     res.json({
       message: `${loggedInUser.firstName}, your profile was updated successfully`,
-      data: loggedInUser,
+      data: safeData,
     });
   } catch (err) {
     res.status(400).send(err.message);
