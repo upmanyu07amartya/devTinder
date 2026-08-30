@@ -12,6 +12,7 @@ const USER_SAFE_DATA = [
   "profileImageUrl",
   "skills",
   "gender",
+  "_id"
 ];
 
 profileRouter.get("/profile/view", userAuth, async (req, res) => {

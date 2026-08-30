@@ -12,6 +12,7 @@ const USER_SAFE_DATA = [
   "profileImageUrl",
   "skills",
   "gender",
+  "_id"
 ];
 
 authRouter.post("/signup", async (req, res) => {
