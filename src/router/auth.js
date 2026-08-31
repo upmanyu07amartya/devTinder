@@ -12,7 +12,7 @@ const USER_SAFE_DATA = [
   "profileImageUrl",
   "skills",
   "gender",
-  "_id"
+  "_id",
 ];
 
 authRouter.post("/signup", async (req, res) => {
@@ -29,9 +29,19 @@ authRouter.post("/signup", async (req, res) => {
       email,
       password: passwordHash,
     }); // create a new user instance with the request body data
+    const token = await user.getJWT();
 
-    await user.save(); // save it to the database
-    res.send("User created Successfully");
+    // Add JWT to cookie and send res back to user
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 8 * 3600000),
+    });
+
+    const savedUser = await user.save(); // save it to the database
+    const safeData = Object.fromEntries(
+      USER_SAFE_DATA.map((field) => [field, savedUser[field]]),
+    );
+
+    res.json({ message: "User created Successfully", data: safeData });
   } catch (err) {
     res.status(500).send(err.message);
   }
