@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema(
     gender: {
       type: String,
       validate(value) {
-        if (!["male", "female", "other", "Male","Female","Other"].includes(value)) {
+        if (value && !["Male", "Female", "Other"].includes(value)) {
           throw new Error(`Gender ${value} is not correct`);
         }
       },
@@ -51,7 +51,7 @@ const userSchema = new mongoose.Schema(
       default:
         "https://cdn.vectorstock.com/i/500p/54/17/faceless-man-placeholder-vector-24005417.jpg",
       validate(value) {
-        if (!validator.isURL(value)) {
+        if (value && !validator.isURL(value)) {
           throw new Error("Please enter a valid url");
         }
       },

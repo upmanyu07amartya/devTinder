@@ -20,15 +20,34 @@ authRouter.post("/signup", async (req, res) => {
     // validate the request
     validateSignup(req);
     // encrypt the password
-    const { firstName, lastName, email, password } = req.body;
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      age,
+      gender,
+      description,
+      profileImageUrl,
+      skills,
+    } = req.body;
     const passwordHash = await bcrypt.hash(password, 10); //brypt.hash returns a promise to awaiting promise
+    const finalProfileImageUrl =
+      profileImageUrl ||
+      "https://cdn.vectorstock.com/i/500p/54/17/faceless-man-placeholder-vector-24005417.jpg";
 
     const user = new User({
       firstName,
       lastName,
       email,
       password: passwordHash,
+      age,
+      gender,
+      description,
+      profileImageUrl: finalProfileImageUrl,
+      skills,
     }); // create a new user instance with the request body data
+
     const token = await user.getJWT();
 
     // Add JWT to cookie and send res back to user
