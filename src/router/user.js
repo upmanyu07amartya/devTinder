@@ -23,7 +23,7 @@ userRouter.get("/user/requests/received", userAuth, async (req, res) => {
       status: "interested",
     }).populate("fromUserId", USER_SAFE_DATA); // this is used to make use of refs
     if (connectionRequests.length === 0) {
-      res.json({ message: "No requests found", data: [] });
+      return res.json({ message: "No requests found", data: [] });
     }
     res.json({
       message: "Connection Requests found",
@@ -45,8 +45,7 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
     })
       .populate("fromUserId", USER_SAFE_DATA)
       .populate("toUserId", USER_SAFE_DATA);
-    if (connections.length === 0)
-      res.json({ message: "No Connections Found", data: [] });
+    if (connections.length === 0){ return res.json({ message: "No Connections Found", data: [] })};
     const data = connections.map((row) => {
       if (row.fromUserId._id.toString() === loggedInUser._id.toString()) {
         return row.toUserId;
